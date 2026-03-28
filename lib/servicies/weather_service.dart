@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 class WeatherService {
   // Замените на ваш реальный ключ из weatherstack dashboard
-  static const String _apiKey = '011254d8d8019d9a04174d63d1307854';
+  static const String _apiKey = '76b0c1c69590147834f658a7ecd49d6a';
   static const String _baseUrl = 'http://api.weatherstack.com/current';
 
   Future<Map<String, dynamic>> getWeather(String city) async {

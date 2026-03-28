@@ -21,7 +21,7 @@ class _WeatherRatesScreenState extends State<WeatherRatesScreen> {
   String _errorMessage = '';
   
   // Данные погоды
-  String _city = 'Москва';
+  String _city = 'Вологда';
   double _temperature = 0;
   String _description = '';
   int _humidity = 0;
