@@ -1,4 +1,8 @@
+// lib/screens/home_screen.dart
+
 import 'package:flutter/material.dart';
+import '../servicies/task_service.dart';
+import '../models/task.dart';
 import 'weather_rates_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,23 +13,39 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Список задач (каждая задача: текст и статус выполнения)
-  List<Map<String, dynamic>> _tasks = [];
-
-  // Контроллер для текстового поля
+  List<Task> _tasks = [];
   final TextEditingController _controller = TextEditingController();
+  final TaskService _taskService = TaskService();
+
+  // Загрузка задач при запуске
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  // Загрузка из SharedPreferences
+  Future<void> _loadTasks() async {
+    final tasks = await _taskService.loadTasks();
+    setState(() {
+      _tasks = tasks;
+    });
+  }
+
+  // Сохранение в SharedPreferences
+  Future<void> _saveTasks() async {
+    await _taskService.saveTasks(_tasks);
+  }
 
   // Добавление задачи
   void _addTask() {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
       setState(() {
-        _tasks.add({
-          'title': text,
-          'isDone': false,
-        });
+        _tasks.add(Task(title: text));
         _controller.clear();
       });
+      _saveTasks(); // Сохраняем после добавления
     }
   }
 
@@ -34,18 +54,20 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _tasks.removeAt(index);
     });
+    _saveTasks(); // Сохраняем после удаления
   }
 
   // Переключение статуса выполнения
   void _toggleTaskStatus(int index) {
     setState(() {
-      _tasks[index]['isDone'] = !_tasks[index]['isDone'];
+      _tasks[index].isDone = !_tasks[index].isDone;
     });
+    _saveTasks(); // Сохраняем после изменения
   }
 
   // Подсчет выполненных задач
   int get _doneCount {
-    return _tasks.where((task) => task['isDone'] == true).length;
+    return _tasks.where((task) => task.isDone).length;
   }
 
   @override
@@ -86,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    onSubmitted: (_) => _addTask(), // Добавление по Enter
+                    onSubmitted: (_) => _addTask(),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -122,20 +144,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: _tasks.length,
                     itemBuilder: (context, index) {
                       final task = _tasks[index];
-                      final isDone = task['isDone'];
                       
                       return ListTile(
                         leading: Checkbox(
-                          value: isDone,
+                          value: task.isDone,
                           onChanged: (_) => _toggleTaskStatus(index),
                         ),
                         title: Text(
-                          task['title'],
+                          task.title,
                           style: TextStyle(
-                            decoration: isDone
+                            decoration: task.isDone
                                 ? TextDecoration.lineThrough
                                 : TextDecoration.none,
-                            color: isDone ? Colors.grey : Colors.black,
+                            color: task.isDone ? Colors.grey : Colors.black,
                           ),
                         ),
                         trailing: IconButton(
