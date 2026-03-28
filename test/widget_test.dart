@@ -11,20 +11,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:my_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('HomeScreen UI smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const MainApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the main screen elements exist.
+    expect(find.text('Мои дела'), findsOneWidget);
+    expect(find.text('Введите задачу...'), findsOneWidget);
+    expect(find.text('Добавить'), findsOneWidget);
+    expect(find.text('Задача 1'), findsOneWidget);
+    expect(find.text('Задача 2'), findsOneWidget);
+    expect(find.text('Всего задач: 5 | Выполнено: 0'), findsOneWidget);
   });
 }
