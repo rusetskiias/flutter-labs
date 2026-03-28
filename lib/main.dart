@@ -12,7 +12,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'TodoApp',
+      title: 'Мои дела',
       debugShowCheckedModeBanner: false,
       home: HomeScreen(), // Здесь можно менять экран для проверки
       // home: QuotesScreen(), // Раскомментировать для проверки экрана цитат
