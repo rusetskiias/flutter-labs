@@ -1,8 +1,52 @@
 import 'package:flutter/material.dart';
-import 'weather_rates_screen.dart'; // импорт второго экрана
+import 'weather_rates_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // Список задач (каждая задача: текст и статус выполнения)
+  List<Map<String, dynamic>> _tasks = [];
+
+  // Контроллер для текстового поля
+  final TextEditingController _controller = TextEditingController();
+
+  // Добавление задачи
+  void _addTask() {
+    final text = _controller.text.trim();
+    if (text.isNotEmpty) {
+      setState(() {
+        _tasks.add({
+          'title': text,
+          'isDone': false,
+        });
+        _controller.clear();
+      });
+    }
+  }
+
+  // Удаление задачи
+  void _deleteTask(int index) {
+    setState(() {
+      _tasks.removeAt(index);
+    });
+  }
+
+  // Переключение статуса выполнения
+  void _toggleTaskStatus(int index) {
+    setState(() {
+      _tasks[index]['isDone'] = !_tasks[index]['isDone'];
+    });
+  }
+
+  // Подсчет выполненных задач
+  int get _doneCount {
+    return _tasks.where((task) => task['isDone'] == true).length;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +61,9 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const WeatherRatesScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const WeatherRatesScreen(),
+                ),
               );
             },
             icon: const Icon(Icons.wb_sunny),
@@ -26,23 +72,26 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
+          // Поле ввода и кнопка "Добавить"
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
+                    controller: _controller,
                     decoration: InputDecoration(
                       hintText: 'Введите задачу...',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
+                    onSubmitted: (_) => _addTask(), // Добавление по Enter
                   ),
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: null,
+                  onPressed: _addTask,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
@@ -59,31 +108,53 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
+          
+          // Список задач
           Expanded(
-            child: ListView.builder(
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: Checkbox(
-                    value: false,
-                    onChanged: null,
+            child: _tasks.isEmpty
+                ? const Center(
+                    child: Text(
+                      'Нет задач. Добавьте первую!',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _tasks.length,
+                    itemBuilder: (context, index) {
+                      final task = _tasks[index];
+                      final isDone = task['isDone'];
+                      
+                      return ListTile(
+                        leading: Checkbox(
+                          value: isDone,
+                          onChanged: (_) => _toggleTaskStatus(index),
+                        ),
+                        title: Text(
+                          task['title'],
+                          style: TextStyle(
+                            decoration: isDone
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                            color: isDone ? Colors.grey : Colors.black,
+                          ),
+                        ),
+                        trailing: IconButton(
+                          onPressed: () => _deleteTask(index),
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                        ),
+                      );
+                    },
                   ),
-                  title: Text('Задача ${index + 1}'),
-                  trailing: IconButton(
-                    onPressed: null,
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                  ),
-                );
-              },
-            ),
           ),
+          
+          // Статистика
           Container(
             padding: const EdgeInsets.all(16),
             color: Colors.grey[200],
-            child: const Text(
-              'Всего задач: 5 | Выполнено: 0',
+            child: Text(
+              'Всего задач: ${_tasks.length} | Выполнено: $_doneCount',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14),
             ),
           ),
         ],
